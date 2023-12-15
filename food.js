@@ -1,20 +1,26 @@
 class Food {
-    constructor(grid) {
-      this.grid = grid;
+    constructor(enviroment) {
+      this.enviroment = enviroment;
       this.x;
       this.y;
       this.placeFood();
     }
+
+    getPosition() {
+      return [this.x, this.y];
+    }
     
     placeFood() {
       do{
-        this.x = Math.floor(Math.random() * this.grid.cols);
-        this.y = Math.floor(Math.random() * this.grid.rows);
-      } while(this.grid.grid[this.x][this.y]==1);
+        this.x = Math.floor(Math.random() * this.enviroment.cols);
+        this.y = Math.floor(Math.random() * this.enviroment.rows);
+      } while(this.enviroment.grid[this.y][this.x] == Number.POSITIVE_INFINITY);
     }
     
     display(){
       fill('red');
-      rect(this.x * this.grid.cellWidth, this.y * this.grid.cellHeight, this.grid.cellWidth/2, this.grid.cellHeight/2);
+      circle((this.x * this.enviroment.cellWidth) + this.enviroment.cellWidth/2, 
+            (this.y * this.enviroment.cellHeight) + this.enviroment.cellHeight/2, 
+            this.enviroment.cellWidth/2)  
     }
   }
