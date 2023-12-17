@@ -23,53 +23,53 @@ class Home {
     textSize(40);
     textFont("Arial");
     textAlign(CENTER);
-    text('Au mosso', 300, 220);
+    text('Au mosso', 400, 340);
 
 
     fill(255, 255, 255);
     textSize(24);
-    text('Como quer matar sua fome?', 300, 270);
+    text('Como quer matar sua fome?', 400, 385);
 
-    rect(120, 330, 100, 50, 5);
-    rect(240, 330, 100, 50, 5);
-    rect(360, 330, 100, 50, 5);
-    rect(180, 400, 100, 50, 5);
-    rect(320, 400, 100, 50, 5);
+    rect(70, 450, 100, 50, 5);
+    rect(215, 450, 100, 50, 5);
+    rect(345, 450, 100, 50, 5);
+    rect(485, 450, 100, 50, 5);
+    rect(625, 450, 100, 50, 5);
 
     fill(0);
-    text('BFS', 170, 362);
-    text('DFS', 290, 362);
-    text('Greedy', 410, 362);
-    text('Uniform', 230, 430);
-    text('A*', 370, 430);
+    text('BFS', 120, 485);
+    text('DFS', 265, 485);
+    text('Greedy', 395, 485);
+    text('Uniform', 535, 485);
+    text('A*', 680, 485);
 
-    if (this.mouseInArea(120, 330, 100, 50, 5)) {
-      this.hoverEffect(120, 330, 100, 50, 5);
-      text('BFS', 170, 362);
+    if (this.mouseInArea(70, 450, 100, 50, 5)) {
+      this.hoverEffect(70, 450, 100, 50, 5);
+      text('BFS', 120, 485);
       cursor(HAND);
       if (mouseIsPressed) return 1;
       return 0;
-    } else if (this.mouseInArea(240, 330, 100, 50, 5)) {
-      this.hoverEffect(240, 330, 100, 50, 5);
-      text('DFS', 290, 362);
+    } else if (this.mouseInArea(215, 450, 100, 50, 5)) {
+      this.hoverEffect(215, 450, 100, 50, 5);
+      text('DFS', 265, 485);
       cursor(HAND);
       if (mouseIsPressed) return 2;
       return 0;
-    } else if (this.mouseInArea(360, 330, 100, 50, 5)) {
-      this.hoverEffect(360, 330, 100, 50, 5);
-      text('Greedy', 410, 362);
+    } else if (this.mouseInArea(345, 450, 100, 50, 5)) {
+      this.hoverEffect(345, 450, 100, 50, 5);
+      text('Greedy', 395, 485);
       cursor(HAND);
       if (mouseIsPressed) return 3;
       return 0;
-    } else if (this.mouseInArea(180, 400, 100, 50, 5)) {
-      this.hoverEffect(180, 400, 100, 50, 5);
-      text('Uniform', 230, 430);
+    } else if (this.mouseInArea(485, 450, 100, 50, 5)) {
+      this.hoverEffect(485, 450, 100, 50, 5);
+      text('Uniform', 535, 485);
       cursor(HAND);
       if (mouseIsPressed) return 4;
       return 0;
-    } else if (this.mouseInArea(320, 400, 100, 50, 5)) {
-      this.hoverEffect(320, 400, 100, 50, 5);
-      text('A*', 370, 430);
+    } else if (this.mouseInArea(625, 450, 100, 50, 5)) {
+      this.hoverEffect(625, 450, 100, 50, 5);
+      text('A*', 680, 485);
       cursor(HAND);
       if (mouseIsPressed) return 5;
       return 0;
