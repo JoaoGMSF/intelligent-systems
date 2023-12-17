@@ -4,7 +4,6 @@ class Home {
   }
 
   hoverEffect(x, y, width, height) {
-
     fill('lightgrey');
     rect(x, y, width, height, 5);
     fill(0);

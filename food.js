@@ -3,14 +3,14 @@ class Food {
       this.enviroment = enviroment;
       this.x;
       this.y;
-      this.placeFood();
+      this.init();
     }
 
     getPosition() {
       return [this.x, this.y];
     }
     
-    placeFood() {
+    init() {
       do{
         this.x = Math.floor(Math.random() * this.enviroment.cols);
         this.y = Math.floor(Math.random() * this.enviroment.rows);

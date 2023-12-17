@@ -1,5 +1,7 @@
 let game, home;
 let type = 0;
+let score = 0;
+let running = false;
 
 function setup() {
   createCanvas(800, 820);
@@ -12,13 +14,18 @@ function draw() {
 
   if(!type){ 
     type = home.drawMenu();
-  } else { 
-    game.init();
-    if(game.start(type)){
+    score = 0;
+  } else if (!running) {
+    game.start();
+    game.render();
+    running = game.getPath(type);
+  } else {
+    running = game.iterate(); // (vai jogar o robo pra proxima posicao)
+    game.render();
+    if (!running) {
       score++;
-      game.render();
-      fill(255, 255, 255);
-      text("Score: " + score, 400, 805);
     }
+    fill(255, 255, 255);
+    text("Score: " + score, 400, 805);
   }
 }
