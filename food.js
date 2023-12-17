@@ -14,7 +14,7 @@ class Food {
       do{
         this.x = Math.floor(Math.random() * this.enviroment.cols);
         this.y = Math.floor(Math.random() * this.enviroment.rows);
-      } while(this.enviroment.grid[this.y][this.y] == Number.POSITIVE_INFINITY);
+      } while(this.enviroment.grid[this.y][this.x] == Number.POSITIVE_INFINITY);
     }
     
     display(){
