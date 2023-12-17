@@ -1,11 +1,10 @@
 class Grid {
   constructor(rows, cols) {
-    // TODO: criar order ao invés de rows
     this.rows = rows;
     this.cols = cols;
     this.size = rows*cols;
     this.cellWidth = width / this.cols;
-    this.cellHeight = height / this.rows;
+    this.cellHeight = (height / this.rows) - 1;
     this.grid = this.createGrid();
   }
 
@@ -24,10 +23,7 @@ class Grid {
           let rand = Math.random();
           if(rand>0.6){
             n = Math.floor(Math.random()*4);
-          } else {
-            
-          }
-
+          } 
         }
         const assignWeights = (n) => {
           switch (n){
@@ -49,41 +45,34 @@ class Grid {
   }
 
   display() {
-    const cellWidth = width / this.cols;
-    const cellHeight = height / this.rows;
-
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.cols; j++) {
-        const x = j * cellWidth;
-        const y = i * cellHeight;
+        const x = j * this.cellWidth;
+        const y = i * this.cellHeight;
         const value = this.grid[i][j];
 
-        // Color of the square depending on the value
         fill(this.colorOfTerrain(value));
-        rect(x, y, cellWidth, cellHeight);
+        rect(x, y, this.cellWidth, this.cellHeight);
 
-        // Display the value in the center of the cell
         fill(255);
         textAlign(CENTER, CENTER);
         if(value != Number.POSITIVE_INFINITY){
-          text(value, x + cellWidth / 2, y + cellHeight / 2);
+          text(value, x + this.cellWidth / 2, y + this.cellHeight / 2);
         }
       }
     }
   }
   
   colorOfTerrain(value) {
-    // Set different colors for each value
     switch (value) {
       case 1:
-        return color('beige'); // Green
+        return color('beige');
       case 5:
-        return color('#795548'); // Blue
+        return color('#795548');
       case 10:
-        return color('rgb(94,167,248)'); // Obstaculo
+        return color('rgb(94,167,248)');
       case Number.POSITIVE_INFINITY:
         return color('#2E2E2E');
-         // Yellow
       default:
         return color('gray');
     }
