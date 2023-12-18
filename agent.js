@@ -31,19 +31,19 @@ class Agent {
   search(type, food) {
     let search = new Search(food, this.enviroment);
     if (!this.processed) {
-        if(type == 1) {
-          // this.path = search.searchBfs();
+        if(type === 1) {
+          this.path = search.bfsSearch([this.x, this.y]);
           console.log("1")
-        } else if(type == 2) {
+        } else if(type === 2) {
           console.log("2")
           this.path = search.dfsSearch([this.x, this.y]);
-        } else if(type == 3) {
+        } else if(type === 3) {
           console.log("3")
           this.path = search.greedySearch([this.x, this.y]);
-        } else if(type == 4) {
+        } else if(type === 4) {
           console.log("4")
           this.path = search.uniformCostSearch([this.x, this.y]);
-        } else if(type == 5) {
+        } else if(type === 5) {
           console.log("5")
           this.path = search.aStarSearch([this.x, this.y])
         }
@@ -64,6 +64,50 @@ class Search {
   isValidPos(x, y) {
     return (0 <= x && x < this.enviroment.rows) && (0 <= y && y < this.enviroment.cols)
             && this.enviroment.grid[y][x] != Number.POSITIVE_INFINITY; 
+  }
+
+  bfsSearch(origin) {
+    let queue = [[origin, [-1, -1]]];
+    let visited = new Set();
+    let parents = Array.from({ length: this.enviroment.rows }, () => 
+                  Array(this.enviroment.cols).fill([-1, -1]));
+
+    while(queue.length !== 0) {
+      let nodeAndParent = queue.shift();
+      let node = nodeAndParent[0];
+      let parent = nodeAndParent[1];
+
+      if (Array.from(visited).some(tuple => JSON.stringify(tuple) === JSON.stringify(node))) {
+        continue;
+      }
+      visited.add(node);
+      parents[node[0]][node[1]] = parent;
+
+      if(node[0] == this.target[0] && node[1] == this.target[1]) {
+        let ptrX = this.target[0];
+        let ptrY = this.target[1];
+
+        let searchPath = [];
+
+        while (ptrX >= 0 && ptrY >= 0) {
+          searchPath.push([ptrX, ptrY]);
+          let value = parents[ptrX][ptrY];
+          ptrX = value[0];
+          ptrY = value[1];
+        }
+        return searchPath.reverse();
+      }
+
+      for(let i = 0; i < 4; ++i) {
+        let posX = node[0] + this.dX[i];
+        let posY = node[1] + this.dY[i];
+        let pos = [posX, posY];
+        if(this.isValidPos(posX, posY) && !visited.has(pos)) {
+          queue.push([pos, node]);
+        }
+      }
+    }
+    return [];
   }
 
   dfsSearch(origin) {
