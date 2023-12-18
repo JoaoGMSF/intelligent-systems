@@ -18,7 +18,7 @@ class Agent {
     } while(this.enviroment.grid[this.y][this.x] == Number.POSITIVE_INFINITY);
   }
   
-  display(index, idVisited){
+  display(idPath, idVisited, idFrontier){
     for(let i = 0; i < idVisited; ++i) {
       let a = this.visited[i][0];
       let b = this.visited[i][1];
@@ -26,22 +26,21 @@ class Agent {
       rect(a * this.enviroment.cellWidth, b * this.enviroment.cellHeight, this.enviroment.cellWidth, this.enviroment.cellHeight);
     }
 
-
-    // let count = 0;
-    // if(index != -1) {
-    //   for(let i = 2; i < this.frontier.length; ++i) {
-    //     for(let j = 0; j < 1; ++j) {
-    //       ++count;
-    //       let a = this.frontier[i][0];
-    //       let b = this.frontier[i][1];
-    //       noFill();
-    //       stroke('red');
-    //       rect(a * this.enviroment.cellWidth, b * this.enviroment.cellHeight, this.enviroment.cellWidth, this.enviroment.cellHeight);
-    //     }
-    //   }
-    // }
-
-    for (let i = 0; i < index; ++i) {
+    console.log("last", this.frontier.length - 1);
+    if(idFrontier != -1) {
+      for(let i = idFrontier; i < this.frontier.length; ++i) {
+        console.log("array", this.frontier[i])
+        for(let j = 0; j < this.frontier[i].length; ++j) {
+          let cell = this.frontier[i][j];
+          let a = cell[0];
+          let b = cell[1];
+          fill('red');
+          rect(a * this.enviroment.cellWidth, b * this.enviroment.cellHeight, this.enviroment.cellWidth, this.enviroment.cellHeight);
+        }
+      }
+    }
+  
+    for (let i = 0; i < idPath; ++i) {
       let a = this.path[i][0];
       let b = this.path[i][1];
       fill('green');
@@ -74,7 +73,7 @@ class Agent {
       this.processed = true;
       this.visited = [...search.visited];
       this.frontier = search.frontier;
-      console.log("frontier",  JSON.stringify(search.frontier));
+      console.log("frontier",  JSON.stringify(search.frontier[0]));
       return this.path.length !== 0;
     }
   }
@@ -117,10 +116,12 @@ class Search {
   }
 
   bfsSearch(origin) {
+    console.log("origin", origin)
     let queue = [[origin, [-1, -1]]];
     let parents = Array.from({ length: this.enviroment.rows }, () => 
                   Array(this.enviroment.cols).fill([-1, -1]));
-
+    
+    let count = 0;
     while(queue.length !== 0) {
       let nodeAndParent = queue.shift();
       let node = nodeAndParent[0];
@@ -147,8 +148,8 @@ class Search {
         let pos = [posX, posY];
         if(this.isValidPos(posX, posY) && !this.isVisited(pos)) {
           queue.push([pos, node]);
+          row.push(pos);
         }
-        row.push(pos);
       }
 
       this.frontier.push(row);
