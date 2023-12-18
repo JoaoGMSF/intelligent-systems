@@ -31,18 +31,22 @@ class Agent {
   search(type, food) {
     let search = new Search(food, this.enviroment);
     if (!this.processed) {
-      switch(type) {
-        case 1:
-          // search.searchBfs();
-        case 2:
+        if(type == 1) {
+          // this.path = search.searchBfs();
+          console.log("1")
+        } else if(type == 2) {
+          console.log("2")
           this.path = search.dfsSearch([this.x, this.y]);
-        case 3:
-          search.greedySearch([this.x, this.y], this.enviroment.grid);
-        case 4:
-          this.path = search.uniformCostSearch([this.x, this.y], this.enviroment.grid);
-        case 5:
-          this.path = search.aStarSearch([this.x, this.y], this.enviroment.grid)
-      }
+        } else if(type == 3) {
+          console.log("3")
+          this.path = search.greedySearch([this.x, this.y]);
+        } else if(type == 4) {
+          console.log("4")
+          this.path = search.uniformCostSearch([this.x, this.y]);
+        } else if(type == 5) {
+          console.log("5")
+          this.path = search.aStarSearch([this.x, this.y])
+        }
       this.processed = true;
       return this.path.length !== 0;
     }
@@ -107,19 +111,20 @@ class Search {
   }
   
   
-  aStarSearch(start, grid) {
+  aStarSearch(start) {
     const openSet = new PriorityQueue();
     const closedSet = new Set();
-    const parents = Array.from({ length: grid.length }, () =>
-      Array(grid[0].length).fill([-1, -1])
+    const parents = Array.from({ length: this.enviroment.rows }, () =>
+      Array(this.enviroment.cols).fill([-1, -1])
     );
 
-    const gScore = Array.from({ length: grid.length }, () =>
-      Array(grid[0].length).fill(Infinity)
+    const gScore = Array.from({ length:  this.enviroment.rows }, () =>
+      Array(this.enviroment.cols).fill(Infinity)
     );
     gScore[start[0]][start[1]] = 0;
 
-    openSet.enqueue(start, heuristic(start, this.target) * grid[start[0]][start[1]] || heuristic(start, this.target));
+    openSet.enqueue(start, heuristic(start, this.target) * 
+                  this.enviroment.grid[start[0]][start[1]] || heuristic(start, this.target));
 
     while (!openSet.isEmpty()) {
       const currentNode = openSet.dequeue();
@@ -141,12 +146,12 @@ class Search {
 
       closedSet.add(currentNode);
 
-      const neighbors = this.getNeighbors(currentNode, grid);
+      const neighbors = this.getNeighbors(currentNode);
 
       neighbors.forEach((neighbor) => {
         if (closedSet.has(neighbor)) return;
 
-        const weight = grid[neighbor[0]][neighbor[1]] || 1;
+        const weight = this.enviroment.grid[neighbor[0]][neighbor[1]] || 1;
         const tentativeGScore = gScore[currentNode[0]][currentNode[1]] + weight;
 
         if (tentativeGScore < gScore[neighbor[0]][neighbor[1]]) {
@@ -161,15 +166,15 @@ class Search {
     return [];
   }
   
-  uniformCostSearch(start, grid) {
+  uniformCostSearch(start) {
     const openSet = new PriorityQueue();
     const closedSet = new Set();
-    const parents = Array.from({ length: grid.length }, () =>
-      Array(grid[0].length).fill([-1, -1])
+    const parents = Array.from({ length: this.enviroment.rows }, () =>
+      Array(this.enviroment.cols).fill([-1, -1])
     );
 
-    const gScore = Array.from({ length: grid.length }, () =>
-      Array(grid[0].length).fill(Infinity)
+    const gScore = Array.from({ length: this.enviroment.rows}, () =>
+      Array(this.enviroment.cols).fill(Infinity)
     );
     gScore[start[0]][start[1]] = 0;
 
@@ -195,12 +200,12 @@ class Search {
 
       closedSet.add(currentNode);
 
-      const neighbors = this.getNeighbors(currentNode, grid);
+      const neighbors = this.getNeighbors(currentNode);
 
       neighbors.forEach((neighbor) => {
         if (closedSet.has(neighbor)) return;
 
-        const weight = grid[neighbor[0]][neighbor[1]] || 1;
+        const weight = this.enviroment.grid[neighbor[0]][neighbor[1]] || 1;
         const tentativeGScore = gScore[currentNode[0]][currentNode[1]] + weight;
 
         if (tentativeGScore < gScore[neighbor[0]][neighbor[1]]) {
@@ -215,10 +220,10 @@ class Search {
     return [];
   }
   
-  greedySearch(start, grid) {
+  greedySearch(start,) {
     const closedSet = new Set();
-    const parents = Array.from({ length: grid.length }, () =>
-      Array(grid[0].length).fill([-1, -1])
+    const parents = Array.from({ length: this.enviroment.rows }, () =>
+      Array(this.enviroment.cols).fill([-1, -1])
     );
 
     const priorityQueue = new PriorityQueue();
@@ -244,7 +249,7 @@ class Search {
 
       closedSet.add(currentNode);
 
-      const neighbors = getNeighbors(currentNode, grid);
+      const neighbors = this.getNeighbors(currentNode);
 
       neighbors.forEach((neighbor) => {
         if (!closedSet.has(neighbor)) {
@@ -257,7 +262,7 @@ class Search {
     return [];
   }
   
-  getNeighbors(node, grid) {
+  getNeighbors(node) {
     const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
     const neighbors = [];
 
@@ -266,7 +271,7 @@ class Search {
       const newY = node[1] + dy;
 
       if (
-        this.isValidPos(newX, newY, grid) && grid[newX][newY] !== 0) {
+        this.isValidPos(newX, newY) && this.enviroment.grid[newX][newY] !== 0) {
         neighbors.push([newX, newY]);
       }
     }
