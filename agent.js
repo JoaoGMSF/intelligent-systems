@@ -65,6 +65,23 @@ class Search {
     return (0 <= x && x < this.enviroment.rows) && (0 <= y && y < this.enviroment.cols)
             && this.enviroment.grid[y][x] != Number.POSITIVE_INFINITY; 
   }
+  isTargetPos(node) {
+    return node[0] === this.target[0] && node[1] === this.target[1]
+  }
+
+  createFinalPath(parents) {
+    let ptrX = this.target[0]
+    let ptrY = this.target[1]
+    const path = [];
+
+    while (ptrX !== -1 && ptrY !== -1) {
+      path.push([ptrX, ptrY]);
+      const value = parents[ptrX][ptrY];
+      ptrX = value[0];
+      ptrY = value[1];
+    }
+    return path.reverse();
+  }
 
   bfsSearch(origin) {
     let queue = [[origin, [-1, -1]]];
@@ -83,19 +100,8 @@ class Search {
       visited.add(node);
       parents[node[0]][node[1]] = parent;
 
-      if(node[0] == this.target[0] && node[1] == this.target[1]) {
-        let ptrX = this.target[0];
-        let ptrY = this.target[1];
-
-        let searchPath = [];
-
-        while (ptrX >= 0 && ptrY >= 0) {
-          searchPath.push([ptrX, ptrY]);
-          let value = parents[ptrX][ptrY];
-          ptrX = value[0];
-          ptrY = value[1];
-        }
-        return searchPath.reverse();
+      if(this.isTargetPos(node)) {
+        return this.createFinalPath(parents);
       }
 
       for(let i = 0; i < 4; ++i) {
@@ -127,19 +133,8 @@ class Search {
       visited.add(node);
       parents[node[0]][node[1]] = parent;
       
-      if(node[0] == this.target[0] && node[1] == this.target[1]) {
-        let ptrX = this.target[0]
-        let ptrY = this.target[1]
-
-        let path = []
-        
-        while (ptrX >= 0 && ptrY >= 0) {
-          path.push([ptrX, ptrY])
-          let value = parents[ptrX][ptrY]
-          ptrX = value[0]
-          ptrY = value[1]
-        }
-        return path.reverse();
+      if(this.isTargetPos(node)) {
+        return this.createFinalPath(parents);
       }
 
       for(let i = 0; i < 4; ++i) {
@@ -167,25 +162,14 @@ class Search {
     );
     gScore[start[0]][start[1]] = 0;
 
-    openSet.enqueue(start, heuristic(start, this.target) * 
-                  this.enviroment.grid[start[0]][start[1]] || heuristic(start, this.target));
+    openSet.enqueue(start, this.heuristic(start) * 
+                  this.enviroment.grid[start[0]][start[1]] || this.heuristic(start));
 
     while (!openSet.isEmpty()) {
       const currentNode = openSet.dequeue();
 
-      if (currentNode[0] === this.target[0] && currentNode[1] === this.target[1]) {
-        let ptrX = currentNode[0];
-        let ptrY = currentNode[1];
-
-        const path = [];
-
-        while (ptrX !== -1 && ptrY !== -1) {
-          path.push([ptrX, ptrY]);
-          const value = parents[ptrX][ptrY];
-          ptrX = value[0];
-          ptrY = value[1];
-        }
-        return path.reverse();
+      if (this.isTargetPos(currentNode)) {
+        return this.createFinalPath(parents);
       }
 
       closedSet.add(currentNode);
@@ -202,7 +186,7 @@ class Search {
           parents[neighbor[0]][neighbor[1]] = currentNode;
           gScore[neighbor[0]][neighbor[1]] = tentativeGScore;
 
-          openSet.enqueue(neighbor, tentativeGScore + heuristic(neighbor, this.target) * weight);
+          openSet.enqueue(neighbor, tentativeGScore + this.heuristic(neighbor) * weight);
         }
       });
     }
@@ -227,19 +211,8 @@ class Search {
     while (!openSet.isEmpty()) {
       const currentNode = openSet.dequeue();
 
-      if (currentNode[0] === this.target[0] && currentNode[1] === this.target[1]) {
-        let ptrX = currentNode[0];
-        let ptrY = currentNode[1];
-
-        const path = [];
-
-        while (ptrX !== -1 && ptrY !== -1) {
-          path.push([ptrX, ptrY]);
-          const value = parents[ptrX][ptrY];
-          ptrX = value[0];
-          ptrY = value[1];
-        }
-        return path.reverse();
+      if (this.isTargetPos(currentNode)) {
+        return this.createFinalPath(parents);
       }
 
       closedSet.add(currentNode);
@@ -271,24 +244,14 @@ class Search {
     );
 
     const priorityQueue = new PriorityQueue();
-    priorityQueue.enqueue(start, heuristic(start, this.target));
+    priorityQueue.enqueue(start, this.heuristic(start));
 
     while (!priorityQueue.isEmpty()) {
+      console.log("aqui")
       const currentNode = priorityQueue.dequeue();
 
-      if (currentNode[0] === this.target[0] && currentNode[1] === this.target[1]) {
-        let ptrX = currentNode[0];
-        let ptrY = currentNode[1];
-
-        const path = [];
-
-        while (ptrX !== -1 && ptrY !== -1) {
-          path.push([ptrX, ptrY]);
-          const value = parents[ptrX][ptrY];
-          ptrX = value[0];
-          ptrY = value[1];
-        }
-        return path.reverse();
+      if (this.isTargetPos(currentNode)) {
+        return this.createFinalPath(parents);
       }
 
       closedSet.add(currentNode);
@@ -296,9 +259,10 @@ class Search {
       const neighbors = this.getNeighbors(currentNode);
 
       neighbors.forEach((neighbor) => {
+        console.log("for")
         if (!closedSet.has(neighbor)) {
           parents[neighbor[0]][neighbor[1]] = currentNode;
-          priorityQueue.enqueue(neighbor, heuristic(neighbor, this.target));
+          priorityQueue.enqueue(neighbor, this.heuristic(neighbor));
         }
       });
     }
@@ -315,7 +279,7 @@ class Search {
       const newY = node[1] + dy;
 
       if (
-        this.isValidPos(newX, newY) && this.enviroment.grid[newX][newY] !== 0) {
+        this.isValidPos(newX, newY)) {
         neighbors.push([newX, newY]);
       }
     }
@@ -323,11 +287,9 @@ class Search {
     return neighbors;
   }
 
-}
-
-function heuristic(pos, target) {
-  // Manhattan distance heuristic
-    return Math.abs(pos[0] - target[0]) + Math.abs(pos[1] - target[1]);
+  heuristic(pos) {
+    return Math.abs(pos[0] - this.target[0]) + Math.abs(pos[1] - this.target[1]);
+  }
 }
 
 class PriorityQueue {
