@@ -20,6 +20,7 @@ function draw() {
     game.render();
     running = game.getPath(type);
   } else {
+    // path de tamanho x
     running = game.iterate(); // (vai jogar o robo pra proxima posicao)
     game.render();
     if (!running) {

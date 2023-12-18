@@ -3,7 +3,9 @@ class Agent {
     this.enviroment = enviroment;
     this.x;
     this.y;
+    this.visited = [];
     this.path = [];
+    this.frontier = [];
     this.processed = false;
 
     this.init();
@@ -16,7 +18,29 @@ class Agent {
     } while(this.enviroment.grid[this.y][this.x] == Number.POSITIVE_INFINITY);
   }
   
-  display(index){
+  display(index, idVisited){
+    for(let i = 0; i < idVisited; ++i) {
+      let a = this.visited[i][0];
+      let b = this.visited[i][1];
+      fill(color(255, 255, 0, 128));
+      rect(a * this.enviroment.cellWidth, b * this.enviroment.cellHeight, this.enviroment.cellWidth, this.enviroment.cellHeight);
+    }
+
+
+    // let count = 0;
+    // if(index != -1) {
+    //   for(let i = 2; i < this.frontier.length; ++i) {
+    //     for(let j = 0; j < 1; ++j) {
+    //       ++count;
+    //       let a = this.frontier[i][0];
+    //       let b = this.frontier[i][1];
+    //       noFill();
+    //       stroke('red');
+    //       rect(a * this.enviroment.cellWidth, b * this.enviroment.cellHeight, this.enviroment.cellWidth, this.enviroment.cellHeight);
+    //     }
+    //   }
+    // }
+
     for (let i = 0; i < index; ++i) {
       let a = this.path[i][0];
       let b = this.path[i][1];
@@ -48,6 +72,9 @@ class Agent {
           this.path = search.aStarSearch([this.x, this.y])
         }
       this.processed = true;
+      this.visited = [...search.visited];
+      this.frontier = search.frontier;
+      console.log("frontier",  JSON.stringify(search.frontier));
       return this.path.length !== 0;
     }
   }
@@ -59,6 +86,8 @@ class Search {
       this.enviroment = enviroment;
       this.dX = [-1, 0, 0, 1];
       this.dY = [0, -1, 1, 0];
+      this.visited = new Set();
+      this.frontier = [];
   }
 
   isValidPos(x, y) {
@@ -69,8 +98,8 @@ class Search {
     return node[0] === this.target[0] && node[1] === this.target[1]
   }
 
-  isVisited(visited, node) {
-    return Array.from(visited).some(tuple => JSON.stringify(tuple) === JSON.stringify(node))
+  isVisited(node) {
+    return Array.from(this.visited).some(tuple => JSON.stringify(tuple) === JSON.stringify(node))
   }
 
   createFinalPath(parents) {
@@ -89,7 +118,6 @@ class Search {
 
   bfsSearch(origin) {
     let queue = [[origin, [-1, -1]]];
-    let visited = new Set();
     let parents = Array.from({ length: this.enviroment.rows }, () => 
                   Array(this.enviroment.cols).fill([-1, -1]));
 
@@ -98,31 +126,38 @@ class Search {
       let node = nodeAndParent[0];
       let parent = nodeAndParent[1];
 
-      if (this.isVisited(visited, node)) {
+      if (this.isVisited(node)) {
         continue;
       }
-      visited.add(node);
+      this.visited.add(node);
       parents[node[0]][node[1]] = parent;
 
       if(this.isTargetPos(node)) {
         return this.createFinalPath(parents);
       }
 
+      let row = [];
+      for(let e = 0; e < queue.length; ++e) {
+        row.push(queue[e][0]);
+      }
+
       for(let i = 0; i < 4; ++i) {
         let posX = node[0] + this.dX[i];
         let posY = node[1] + this.dY[i];
         let pos = [posX, posY];
-        if(this.isValidPos(posX, posY) && !this.isVisited(visited, pos)) {
+        if(this.isValidPos(posX, posY) && !this.isVisited(pos)) {
           queue.push([pos, node]);
         }
+        row.push(pos);
       }
+
+      this.frontier.push(row);
     }
     return [];
   }
 
   dfsSearch(origin) {
     let stack = [[origin, [-1, -1]]];
-    let visited = new Set();
     let parents = Array.from({ length: this.enviroment.rows }, () => 
                   Array(this.enviroment.cols).fill([-1, -1]));
 
@@ -130,11 +165,11 @@ class Search {
       let nodeAndParent = stack.pop();
       let node = nodeAndParent[0]
       let parent = nodeAndParent[1]
-      
-      if (Array.from(visited).some(tuple => JSON.stringify(tuple) === JSON.stringify(node))) {
+
+      if (Array.from(this.visited).some(tuple => JSON.stringify(tuple) === JSON.stringify(node))) {
         continue;
       }
-      visited.add(node);
+      this.visited.add(node);
       parents[node[0]][node[1]] = parent;
       
       if(this.isTargetPos(node)) {
@@ -145,7 +180,7 @@ class Search {
         let posX = node[0] + this.dX[i];
         let posY = node[1] + this.dY[i];
         let pos = [posX, posY];
-        if(this.isValidPos(posX, posY) && !this.isVisited(visited, pos)) {
+        if(this.isValidPos(posX, posY) && !this.isVisited(pos)) {
           stack.push([pos, node]);
         }
       }
@@ -153,10 +188,8 @@ class Search {
     return [];
   }
   
-  
   aStarSearch(start) {
     const openSet = new PriorityQueue();
-    const visited = new Set();
     const parents = Array.from({ length: this.enviroment.rows }, () =>
       Array(this.enviroment.cols).fill([-1, -1])
     );
@@ -172,16 +205,16 @@ class Search {
     while (!openSet.isEmpty()) {
       const currentNode = openSet.dequeue();
 
+      this.visited.add(currentNode);
+
       if (this.isTargetPos(currentNode)) {
         return this.createFinalPath(parents);
       }
 
-      visited.add(currentNode);
-
       const neighbors = this.getNeighbors(currentNode);
 
       neighbors.forEach((neighbor) => {
-        if (this.isVisited(visited, neighbor)) return;
+        if (this.isVisited(neighbor)) return;
 
         const weight = this.enviroment.grid[neighbor[0]][neighbor[1]] || 1;
         const tentativeGScore = gScore[currentNode[0]][currentNode[1]] + weight;
@@ -200,7 +233,6 @@ class Search {
   
   uniformCostSearch(start) {
     const openSet = new PriorityQueue();
-    const visited = new Set();
     const parents = Array.from({ length: this.enviroment.rows }, () =>
       Array(this.enviroment.cols).fill([-1, -1])
     );
@@ -215,16 +247,16 @@ class Search {
     while (!openSet.isEmpty()) {
       const currentNode = openSet.dequeue();
 
+      this.visited.add(currentNode);
+
       if (this.isTargetPos(currentNode)) {
         return this.createFinalPath(parents);
       }
 
-      visited.add(currentNode);
-
       const neighbors = this.getNeighbors(currentNode);
 
       neighbors.forEach((neighbor) => {
-        if (this.isVisited(visited, neighbor)) return;
+        if (this.isVisited(neighbor)) return;
 
         const weight = this.enviroment.grid[neighbor[0]][neighbor[1]] || 1;
         const tentativeGScore = gScore[currentNode[0]][currentNode[1]] + weight;
@@ -242,7 +274,6 @@ class Search {
   }
   
   greedySearch(start,) {
-    const visited = new Set();
     const parents = Array.from({ length: this.enviroment.rows }, () =>
       Array(this.enviroment.cols).fill([-1, -1])
     );
@@ -251,20 +282,18 @@ class Search {
     priorityQueue.enqueue(start, this.heuristic(start));
 
     while (!priorityQueue.isEmpty()) {
-      console.log("aqui")
       const currentNode = priorityQueue.dequeue();
+
+      this.visited.add(currentNode);
 
       if (this.isTargetPos(currentNode)) {
         return this.createFinalPath(parents);
       }
 
-      visited.add(currentNode);
-
       const neighbors = this.getNeighbors(currentNode);
 
       neighbors.forEach((neighbor) => {
-        console.log("for")
-        if (!this.isVisited(visited, neighbor)) {
+        if (!this.isVisited(neighbor)) {
           parents[neighbor[0]][neighbor[1]] = currentNode;
           priorityQueue.enqueue(neighbor, this.heuristic(neighbor));
         }
