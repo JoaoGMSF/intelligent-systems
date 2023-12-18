@@ -69,6 +69,10 @@ class Search {
     return node[0] === this.target[0] && node[1] === this.target[1]
   }
 
+  isVisited(visited, node) {
+    return Array.from(visited).some(tuple => JSON.stringify(tuple) === JSON.stringify(node))
+  }
+
   createFinalPath(parents) {
     let ptrX = this.target[0]
     let ptrY = this.target[1]
@@ -94,7 +98,7 @@ class Search {
       let node = nodeAndParent[0];
       let parent = nodeAndParent[1];
 
-      if (Array.from(visited).some(tuple => JSON.stringify(tuple) === JSON.stringify(node))) {
+      if (this.isVisited(visited, node)) {
         continue;
       }
       visited.add(node);
@@ -108,7 +112,7 @@ class Search {
         let posX = node[0] + this.dX[i];
         let posY = node[1] + this.dY[i];
         let pos = [posX, posY];
-        if(this.isValidPos(posX, posY) && !visited.has(pos)) {
+        if(this.isValidPos(posX, posY) && !this.isVisited(visited, pos)) {
           queue.push([pos, node]);
         }
       }
@@ -141,7 +145,7 @@ class Search {
         let posX = node[0] + this.dX[i];
         let posY = node[1] + this.dY[i];
         let pos = [posX, posY];
-        if(this.isValidPos(posX, posY) && !visited.has(pos)) {
+        if(this.isValidPos(posX, posY) && !this.isVisited(visited, pos)) {
           stack.push([pos, node]);
         }
       }
@@ -152,7 +156,7 @@ class Search {
   
   aStarSearch(start) {
     const openSet = new PriorityQueue();
-    const closedSet = new Set();
+    const visited = new Set();
     const parents = Array.from({ length: this.enviroment.rows }, () =>
       Array(this.enviroment.cols).fill([-1, -1])
     );
@@ -172,12 +176,12 @@ class Search {
         return this.createFinalPath(parents);
       }
 
-      closedSet.add(currentNode);
+      visited.add(currentNode);
 
       const neighbors = this.getNeighbors(currentNode);
 
       neighbors.forEach((neighbor) => {
-        if (closedSet.has(neighbor)) return;
+        if (this.isVisited(visited, neighbor)) return;
 
         const weight = this.enviroment.grid[neighbor[0]][neighbor[1]] || 1;
         const tentativeGScore = gScore[currentNode[0]][currentNode[1]] + weight;
@@ -196,7 +200,7 @@ class Search {
   
   uniformCostSearch(start) {
     const openSet = new PriorityQueue();
-    const closedSet = new Set();
+    const visited = new Set();
     const parents = Array.from({ length: this.enviroment.rows }, () =>
       Array(this.enviroment.cols).fill([-1, -1])
     );
@@ -215,12 +219,12 @@ class Search {
         return this.createFinalPath(parents);
       }
 
-      closedSet.add(currentNode);
+      visited.add(currentNode);
 
       const neighbors = this.getNeighbors(currentNode);
 
       neighbors.forEach((neighbor) => {
-        if (closedSet.has(neighbor)) return;
+        if (this.isVisited(visited, neighbor)) return;
 
         const weight = this.enviroment.grid[neighbor[0]][neighbor[1]] || 1;
         const tentativeGScore = gScore[currentNode[0]][currentNode[1]] + weight;
@@ -238,7 +242,7 @@ class Search {
   }
   
   greedySearch(start,) {
-    const closedSet = new Set();
+    const visited = new Set();
     const parents = Array.from({ length: this.enviroment.rows }, () =>
       Array(this.enviroment.cols).fill([-1, -1])
     );
@@ -254,13 +258,13 @@ class Search {
         return this.createFinalPath(parents);
       }
 
-      closedSet.add(currentNode);
+      visited.add(currentNode);
 
       const neighbors = this.getNeighbors(currentNode);
 
       neighbors.forEach((neighbor) => {
         console.log("for")
-        if (!closedSet.has(neighbor)) {
+        if (!this.isVisited(visited, neighbor)) {
           parents[neighbor[0]][neighbor[1]] = currentNode;
           priorityQueue.enqueue(neighbor, this.heuristic(neighbor));
         }
