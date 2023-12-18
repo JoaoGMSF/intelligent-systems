@@ -31,16 +31,17 @@ class Agent {
   search(type, food) {
     let search = new Search(food, this.enviroment);
     if (!this.processed) {
-      if (type === 1) {
-        this.path = search.bfsSearch([this.x, this.y]);
-      } else if (type === 2) {
-        this.path = search.dfsSearch([this.x, this.y]);
-      } else if (type === 3) {
-        search.greedySearch([this.x, this.y], this.enviroment.grid);
-      } else if (type === 4) {
-        this.path = search.uniformCostSearch([this.x, this.y], this.enviroment.grid);
-      } else if (type === 5) {
-        this.path = search.aStarSearch([this.x, this.y], this.enviroment.grid);
+      switch(type) {
+        case 1:
+          // search.searchBfs();
+        case 2:
+          this.path = search.dfsSearch([this.x, this.y]);
+        case 3:
+          search.greedySearch([this.x, this.y], this.enviroment.grid);
+        case 4:
+          this.path = search.uniformCostSearch([this.x, this.y], this.enviroment.grid);
+        case 5:
+          this.path = search.aStarSearch([this.x, this.y], this.enviroment.grid)
       }
       this.processed = true;
       return this.path.length !== 0;
@@ -105,49 +106,6 @@ class Search {
     return [];
   }
   
-  bfsSearch(origin) {
-    let queue = [[origin, [-1, -1]]];
-    let visited = new Set();
-    let parents = Array.from({ length: this.enviroment.rows }, () => 
-                  Array(this.enviroment.cols).fill([-1, -1]));
-
-    while(queue.length !== 0) {
-      let nodeAndParent = queue.shift();
-      let node = nodeAndParent[0];
-      let parent = nodeAndParent[1];
-
-      if (Array.from(visited).some(tuple => JSON.stringify(tuple) === JSON.stringify(node))) {
-        continue;
-      }
-      visited.add(node);
-      parents[node[0]][node[1]] = parent;
-
-      if(node[0] == this.target[0] && node[1] == this.target[1]) {
-        let ptrX = this.target[0];
-        let ptrY = this.target[1];
-
-        let searchPath = [];
-
-        while (ptrX >= 0 && ptrY >= 0) {
-          searchPath.push([ptrX, ptrY]);
-          let value = parents[ptrX][ptrY];
-          ptrX = value[0];
-          ptrY = value[1];
-        }
-        return searchPath.reverse();
-      }
-
-      for(let i = 0; i < 4; ++i) {
-        let posX = node[0] + this.dX[i];
-        let posY = node[1] + this.dY[i];
-        let pos = [posX, posY];
-        if(this.isValidPos(posX, posY) && !visited.has(pos)) {
-          queue.push([pos, node]);
-        }
-      }
-    }
-    return [];
-  }
   
   aStarSearch(start, grid) {
     const openSet = new PriorityQueue();
@@ -258,15 +216,16 @@ class Search {
   }
   
   greedySearch(start, grid) {
-    const openSet = new PriorityQueue();
+    const closedSet = new Set();
     const parents = Array.from({ length: grid.length }, () =>
       Array(grid[0].length).fill([-1, -1])
     );
-    
-    openSet.enqueue(start, heuristic(start, this.target) * (grid[start[0]][start[1]]) || heuristic(start, this.target));
-     
-    while (!openSet.isEmpty()) {
-      const currentNode = openSet.dequeue();
+
+    const priorityQueue = new PriorityQueue();
+    priorityQueue.enqueue(start, heuristic(start, this.target));
+
+    while (!priorityQueue.isEmpty()) {
+      const currentNode = priorityQueue.dequeue();
 
       if (currentNode[0] === this.target[0] && currentNode[1] === this.target[1]) {
         let ptrX = currentNode[0];
@@ -283,24 +242,16 @@ class Search {
         return path.reverse();
       }
 
-      const neighbors = this.getNeighbors(currentNode, grid);
-      
-      for (const neighbor of neighbors) {
-        let neighborFound = false;
+      closedSet.add(currentNode);
 
-        for (const element of openSet.elements) {
-          console.log(element.item)
-          if (element.item[0] === neighbor[0] && element.item[1] === neighbor[1]) {
-            neighborFound = true;
-            break;
-          }
-        }
+      const neighbors = getNeighbors(currentNode, grid);
 
-        if (!neighborFound) {
-          openSet.enqueue(neighbor, heuristic(neighbor, this.target) * grid[neighbor[0]][neighbor[1]]);
+      neighbors.forEach((neighbor) => {
+        if (!closedSet.has(neighbor)) {
           parents[neighbor[0]][neighbor[1]] = currentNode;
+          priorityQueue.enqueue(neighbor, heuristic(neighbor, this.target));
         }
-      }
+      });
     }
 
     return [];
